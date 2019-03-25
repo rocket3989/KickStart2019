@@ -51,6 +51,8 @@ void printNet(int R,int C){
         }
         cout <<'\n';
     }
+    cout <<'\n';
+
 }
 
 int main(){
@@ -97,42 +99,44 @@ int main(){
             }
         }
         
-        bool found = false;
-        int best;
-        for(int i = 0; i < row.size() && !found; i++){
-            bool inRange = true;
-            for(int j = 0; j < row.size() && inRange; j++){
-                if(abs(row[i]-row[j]) + abs(col[i] - col[j]) > max - 1)
-                    inRange = false;
-            }
-            if(inRange){
-                best = i;
-                found  = true;
+        int x,y;
+        int min = 100;
+        for(int r = 0; r < R; r++){
+            for(int c = 0; c < C; c++){
+                int sum = 0;
+                
+                for(int i = 0; i < row.size(); i++){
+                    int dist = abs(r-row[i]) + abs(c - col[i]);
+                    sum += (dist > max - 1) ? 100 : dist;
+                }
+    
+                if(sum < min){
+                    min = sum;
+                    x = c;
+                    y = r;
+                }
             }
         }
 
-        if(found){
-            net[row[best]][col[best]] = 0;
+        net[y][x] = 0;
 
-            evalNet(R,C);
+        evalNet(R,C);
 
-            printNet(R,C);
-            
-            max = 0;
-            for(int r = 0; r < R; r++)
-                for(int c = 0; c < C; c++)
-                    if(max < net[r][c])
-                        max = net[r][c];
-
-        }
-
-        cout << "Case #" << test + 1 << ": "<< max << endl;
+        printNet(R,C);
         
+        max = 0;
+        for(int r = 0; r < R; r++)
+            for(int c = 0; c < C; c++)
+                if(max < net[r][c])
+                    max = net[r][c];
+
+        
+        cout << "Case #" << test + 1 << ": "<< max << endl;
     }
 }
 
 /*
-6
+7
 3 3
 101
 000
@@ -172,5 +176,10 @@ int main(){
 00001
 00011
 10111
+3 5
+10101
+00000
+10101
+
 
 */
