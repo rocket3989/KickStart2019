@@ -1,53 +1,67 @@
 #include <iostream>
 #include <vector>
 #include <cstdlib>
+#include <utility>
 
 using namespace std;
 
+#define x first
+#define y second
+
+typedef unsigned long long lli;
+
+int maxOf(int a, int b){
+    return (a > b ? a : b);
+}
+
+int minOf(int a, int b){
+    return (a < b ? a : b);
+}
+vector<pair <int,int>> centers;
+vector<pair <int,int>> points;
+
 int net [250][250] = {0};
 
-void evalNet(int R, int C){
-    bool found = true;
-    int nextVal = 0;
-    while(found){
+int R, C;
 
-        found = false;
 
-        for(int r = 0; r < R; r++){
-            for(int c = 0; c < C; c++){
-                if(net[r][c] == nextVal){
 
-                    if(r > 0 && net[r-1][c] > nextVal + 1){
-                        found = true;
-                        net[r-1][c] = nextVal + 1;
-                    }
+void evalNet(){
+    points = centers;
+    
+    int count = 0;
+    while(count < R*C){
 
-                    if(r < R - 1 && net[r+1][c] > nextVal + 1){
-                        found = true;
-                        net[r+1][c] = nextVal + 1;
-                    }
+        int r = points[count].x, c = points[count].y;
 
-                    if(c > 0 && net[r][c-1] > nextVal + 1){
-                        found = true;
-                        net[r][c-1] = nextVal + 1;
-                    }
-
-                    if(c < C - 1 && net[r][c+1] > nextVal + 1){
-                        found = true;
-                        net[r][c+1] = nextVal + 1;
-                    }
-                }
-            }
+        if(r > 0 && net[r-1][c] > net[r][c] + 1){
+            net[r-1][c] = net[r][c] + 1;
+            points.push_back(make_pair(r-1,c));
         }
 
-        nextVal++;
+        if(r < R - 1 && net[r+1][c] > net[r][c] + 1){
+            net[r+1][c] = net[r][c] + 1;
+            points.push_back(make_pair(r+1,c));
+        }
+
+        if(c > 0 && net[r][c-1] > net[r][c] + 1){
+            net[r][c-1] = net[r][c] + 1;
+            points.push_back(make_pair(r,c-1));
+        }
+
+        if(c < C - 1 && net[r][c+1] > net[r][c] + 1){
+            net[r][c+1] = net[r][c] + 1;
+            points.push_back(make_pair(r,c+1));
+        }
+        count++;
     }
 }
 
-void printNet(int R,int C){
+void printNet(){
+    cout <<'\n';    
     for(int r = 0; r < R; r++){
         for(int c = 0; c < C; c++){
-            cout << net[r][c];
+            cout << net[r][c] << ' ';
         }
         cout <<'\n';
     }
@@ -56,10 +70,11 @@ void printNet(int R,int C){
 }
 
 int main(){
+
     int tests = 0;
     cin >> tests;
     for(int test = 0; test < tests; test++){
-        int R, C, max = 0;
+        centers.clear();
         char input;
         
         cin >> R >> C;
@@ -69,29 +84,41 @@ int main(){
                 cin >> input;
                 if(input == '0')
                     net[r][c] = 1000;
-                else
+                else{
                     net[r][c] = 0;
+                    centers.push_back(make_pair(r,c));
+                }
             }
         } 
 
 
-        int min = 100;
+        evalNet();       //build the network
+
+
+        //printNet();
+
+        
+        int score = net[points[points.size()-1].x][points[points.size()-1].y];
+        
+        for(int ro = 0; ro < R; ro++)
+            for(int co = 0; co < C; co++)
+                if(net[ro][co] != 0)
+                    net[ro][co] = 100;
 
         for(int r = 0; r < R; r++){
             for(int c = 0; c < C; c++){
                 if(net[r][c] != 0){
                     net[r][c] = 0;
-    
-                    evalNet(R,C);
-                    max = 0;
-                    for(int ro = 0; ro < R; ro++)
-                        for(int co = 0; co < C; co++)
-                            if(max < net[ro][co])
-                                max = net[ro][co];
-                                
-                    if(max < min)
-                        min = max;
-                    
+
+                    centers.push_back(make_pair(r,c));
+                    evalNet();
+
+                    //printNet();
+
+                    score = minOf(score,net[points[points.size()-1].x][points[points.size()-1].y]);
+
+
+                    centers.pop_back();
                     net[r][c] = 100;
                     for(int ro = 0; ro < R; ro++)
                         for(int co = 0; co < C; co++)
@@ -100,9 +127,102 @@ int main(){
                 }
             }
         }
+
+
+
+        //evalNet();
+
+       // printNet();
         
 
         
-        cout << "Case #" << test + 1 << ": "<< min << endl;
+        cout << "Case #" << test + 1 << ": "<< score << endl;
     }
 }
+
+/*
+7
+3 3
+101
+000
+101
+1 2
+11
+5 5
+10001
+00000
+00000
+00000
+10001
+10 10
+1000000000
+0000000000
+0000000000
+0000000000
+0000000000
+0000000000
+0000000000
+0000000000
+0000000000
+0000000001
+5 7
+1110111
+1100011
+1000001
+1100011
+1111111
+9 5
+11101
+11000
+10000
+00000
+00000
+00000
+00001
+00011
+10111
+3 5
+10101
+00000
+10101
+
+
+5 5
+10000
+00000
+00000
+00000
+00001
+
+
+*/
+
+
+
+
+/*
+
+
+
+1 2 3 4 5 6 7 
+      ^
+    passed true..
+1 2 3 4
+  ^
+    passed false..
+3 4
+^
+    passed false..
+
+4
+
+
+
+
+
+
+
+
+
+
+*/
